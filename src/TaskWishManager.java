@@ -3,96 +3,88 @@ import java.io.FileNotFoundException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 class TaskWishManager {
-    static Child child = new Child(); // Single instance of the Child class
+    Child child; // Assuming Child class exists
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-    // Loads tasks from the specified file
-
-
-    // Loads wishes from the specified file
-    public static void loadWishes(String fileName) {
-        try (Scanner scannerW = new Scanner(new File(fileName))) {
-            while (scannerW.hasNextLine()) {
-                String[] parts = scannerW.nextLine().split(",");
-                addWish(parts); // Delegate to helper
-                System.out.println("Wish: " + parts[0] + " added");
-            }
-        } catch (FileNotFoundException e) {
-            System.out.println("Wish file not found.");
-        }
+    public TaskWishManager(Child child) {
+    	this.child = child;
     }
-
-    // Adds a wish based on the number of parameters
-    public static void addWish(String[] parts) {
-        if (parts.length == 3) {
-            // Wish without specific time
-            child.wishes.add(new Wish(
-                    Integer.parseInt(parts[0]), parts[1], parts[2]
-            ));
-        } else if (parts.length == 5) {
-            // Wish with date and hour
-            child.wishes.add(new Wish(
-                    Integer.parseInt(parts[0]), parts[1], parts[2],
-                    parts[3], parts[4]
-            ));
-        }
-    }
-
-    // Processes all commands from the command file
-    public static void processCommands(String fileName) {
+    
+    public void processCommands(String fileName) {
         try (Scanner scannerC = new Scanner(new File(fileName))) {
             while (scannerC.hasNextLine()) {
-                String nextLine = scannerC.nextLine();
-                String[] command = nextLine.split(" ");
-                String[] wtParts = nextLine.split("_");
+                String line = scannerC.nextLine().trim();
+                if (line.isEmpty()) continue;
 
-                switch (command[0]) {
-                    case "ADD_TASK":
-                        // Format: ADD_TASK_id_title_description_date_hour_points
-                        if (wtParts.length == 8) {
-                            child.tasks.add(new Task(
-                                    Integer.parseInt(wtParts[2]), wtParts[3], wtParts[4],
-                                    wtParts[5], wtParts[6], Integer.parseInt(wtParts[7])
-                            ));
-                            System.out.println("Task added: " + wtParts[3]);
+                // Parse the line respecting quoted strings
+                String[] tokens = parseCommand(line);
+
+                if (tokens.length == 0) continue;
+
+                String command = tokens[0];
+
+                switch (command) {
+                    case "ADD_TASK1":
+                        if (tokens.length == 8) {
+                            int id = Integer.parseInt(tokens[2]);
+                            String title = tokens[3];
+                            String description = tokens[4];
+                            String dateStr = tokens[5];
+                            String timeStr = tokens[6];
+                            int points = Integer.parseInt(tokens[7]);
+
+                            LocalDateTime dateTime = LocalDateTime.parse(dateStr + " " + timeStr, FORMATTER);
+
+                            Task task = new Task(id, title, description, points, tokens[1], dateTime);
+                            child.tasks.put(id, task);
+                            System.out.println("Task added: " + title);
                         }
                         break;
+
                     case "TASK_DONE":
-                        markTaskCompleted(Integer.parseInt(command[1]));
+                        markTaskCompleted(Integer.parseInt(tokens[1]));
                         break;
+
                     case "TASK_CHECKED":
                         approveTask(
-                                Integer.parseInt(command[1]),
-                                Integer.parseInt(command[2])
+                                Integer.parseInt(tokens[1]),
+                                Integer.parseInt(tokens[2])
                         );
                         break;
-                    case "ADD_WISH":
-                        // Wish without time
-                        if (wtParts.length == 5) {
-                            child.wishes.add(new Wish(
-                                    Integer.parseInt(wtParts[2]),
-                                    wtParts[3], wtParts[4]
-                            ));
-                            System.out.println("Wish added: " + wtParts[3]);
+
+                    case "ADD_WISH1":
+                        if (tokens.length == 4) {
+                            int id = Integer.parseInt(tokens[1]);
+                            String title = tokens[2];
+                            String detail = tokens[3];
+                            child.wishes.put(id, new Wish(id, title, detail));
+                            System.out.println("Type 1 Wish added: " + title);
                         }
-                        // Wish with time
-                        else if (wtParts.length == 7) {
-                            child.wishes.add(new Wish(
-                                    Integer.parseInt(wtParts[2]),
-                                    wtParts[3], wtParts[4],
-                                    wtParts[5], wtParts[6]
-                            ));
-                            System.out.println("Wish added: " + wtParts[3]);
+                        break;
+
+                    case "ADD_WISH2":
+                        if (tokens.length == 8) {
+                            int id = Integer.parseInt(tokens[1]);
+                            String title = tokens[2];
+                            String detail = tokens[3];
+                            LocalDateTime start = LocalDateTime.parse(tokens[4] + " " + tokens[5], FORMATTER);
+                            LocalDateTime end = LocalDateTime.parse(tokens[6] + " " + tokens[7], FORMATTER);
+
+                            child.wishes.put(id, new Wish(id, title, detail, start, end));
+                            System.out.println("Type 2 Wish added: " +  title);
                         }
                         break;
 
                     case "WISH_CHECKED":
-                        approveWish(
-                                Integer.parseInt(command[1]),
-                                Integer.parseInt(command[2])
-                        );
+                        if (tokens.length >= 5) {
+                            int id = Integer.parseInt(tokens[1]);
+                            int level = Integer.parseInt(tokens[4]);
+                            approveWish(id, level);
+                        }
                         break;
 
                     case "PRINT_STATUS":
@@ -112,12 +104,16 @@ class TaskWishManager {
                         break;
 
                     case "ADD_POINT":
-                        child.addPoints(Integer.parseInt(command[1]));
-                        System.out.println(command[1] + " points added.");
+                        child.addPoints(Integer.parseInt(tokens[1]));
+                        System.out.println(tokens[1] + " points added.");
+                        break;
+
+                    case "PRINT_BUDGET":
+                        child.printStatus();
                         break;
 
                     default:
-                        System.out.println("Unknown command: " + command[0]);
+                        System.out.println("Unknown command: " + command);
                 }
             }
         } catch (FileNotFoundException e) {
@@ -125,22 +121,31 @@ class TaskWishManager {
         }
     }
 
-    // Marks a task as completed by its ID
-    public static void markTaskCompleted(int taskId) {
-        for (Task task : child.tasks) {
-            if (task.id == taskId) {
-                task.markCompleted();
-                System.out.println("Task " + taskId + " marked as completed.");
-                return;
-            }
+    private static String[] parseCommand(String line) {
+        Matcher m = Pattern.compile("\"([^\"]*)\"|(\\S+)").matcher(line);
+        java.util.List<String> tokens = new java.util.ArrayList<>();
+        while (m.find()) {
+            if (m.group(1) != null)
+                tokens.add(m.group(1)); // quoted string without quotes
+            else
+                tokens.add(m.group(2)); // normal word
         }
-        System.out.println("Task not found.");
+        return tokens.toArray(new String[0]);
     }
 
-    // Approves a completed task based on the given rating
-    public static void approveTask(int taskId, int rating) {
-        for (Task task : child.tasks) {
-            if (task.id == taskId && task.taskState == stateT.complete) {
+    public void markTaskCompleted(int taskId) {
+        if (child.tasks.containsKey(taskId)) {
+            child.tasks.get(taskId).markCompleted();
+            System.out.println("Task " + taskId + " marked as completed.");
+        } else {
+            System.out.println("Task not found.");
+        }
+    }
+
+    public void approveTask(int taskId, int rating) {
+        if (child.tasks.containsKey(taskId)) {
+            Task task = child.tasks.get(taskId);
+            if (task.taskState == stateT.complete) {
                 int pointsAwarded = (task.points * rating) / 5;
                 child.addPoints(pointsAwarded);
                 task.markApproved();
@@ -151,32 +156,21 @@ class TaskWishManager {
         System.out.println("Task not found or not completed.");
     }
 
-    // Overloaded method to add wish without time
-    public static void addWish(int id, String title, String details) {
-        child.wishes.add(new Wish(id, title, details));
-        System.out.println("Wish added: " + title);
-    }
-
-    // Overloaded method to add wish with date and time
-    public static void addWish(int id, String title, String details, String date, String time) {
-        child.wishes.add(new Wish(id, title, details, date, time));
-        System.out.println("Wish added: " + title);
-    }
-
-    // Approves a wish if the child's level is high enough
-    public static void approveWish(int wishId, int requiredLevel) {
-        for (Wish wish : child.wishes) {
-            if (wish.id == wishId && wish.wishState != stateW.approved) {
+    public void approveWish(int wishId, int requiredLevel) {
+        if (child.wishes.containsKey(wishId)) {
+            Wish wish = child.wishes.get(wishId);
+            if (wish.wishState != stateW.approved) {
                 if (child.level >= requiredLevel) {
-                    wish.approve(requiredLevel);
-                    wish.wishState = stateW.approved;
+                    wish.approve();
                     System.out.println("Wish " + wishId + " granted: " + wish.title);
                 } else {
                     System.out.println("Wish " + wishId + " not granted, required level: " + requiredLevel);
                 }
-                return;
+            } else {
+                System.out.println("Wish already approved.");
             }
+        } else {
+            System.out.println("Wish not found.");
         }
-        System.out.println("Wish not found or already approved.");
     }
 }

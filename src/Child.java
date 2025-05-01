@@ -1,6 +1,4 @@
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 class Child {
     // Child's current points and level
@@ -10,7 +8,7 @@ class Child {
     // Lists to store the child's tasks and wishes
      HashMap<Integer, Task> tasks = new HashMap<>();
      HashMap<Integer, Wish> wishes = new HashMap<>();
-
+     
     // Schedule manager for printing
      Schedule schedule = new Schedule();
 

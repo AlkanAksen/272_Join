@@ -1,7 +1,5 @@
-import java.time.LocalDate;  // Importing LocalDate for task scheduling
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;       // Importing Date for deadline (currently unused)
 
 // Enum representing the state of the task
 enum stateT {
@@ -30,7 +28,7 @@ class Task {
         this.description = description; // Set task description
         this.points = points;           // Set points for the task
         this.type = type;
-        this.deadline= deadline
+        this.deadline= deadline;
     }
 
     public Task(int id, String title, String description, int points,String type, LocalDateTime dateStart , LocalDateTime dateEnd) {
