@@ -5,7 +5,9 @@ import java.util.HashMap;
 class Schedule {
 
 	private static final int TITLE_WIDTH = 25;
+	DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
+	
 	// Method to print the list of tasks
 	void printTaskList(HashMap<Integer, Task> tasks) {
 		System.out.println("┌─────┬──────────────────────────┐"); // Table header
@@ -55,9 +57,11 @@ class Schedule {
 		// Loop through each wish to print approved ones for the current day
 		for (Wish w : wishes.values()) {
 			// Print wish details only if it's approved and scheduled for today
-			if (w.wishState == stateW.approved && w.dateStart != null && currentDateTime.toLocalDate().isEqual(w.dateStart.toLocalDate())) {
+			if (w.wishState == stateW.approved && w.dateStart != null
+					&& currentDateTime.toLocalDate().isEqual(w.dateStart.toLocalDate())) {
 				String title = String.format(" %-" + TITLE_WIDTH + "s", w.title); // Format wish title
-				String hour = w.dateStart.format(DateTimeFormatter.ofPattern("HH:mm"))+"-"+w.dateEnd.format(DateTimeFormatter.ofPattern("HH:mm")); // Format task hour
+				String hour = w.dateStart.format(DateTimeFormatter.ofPattern("HH:mm")) + "-"
+						+ w.dateEnd.format(DateTimeFormatter.ofPattern("HH:mm")); // Format task hour
 				// Print the wish scheduled for the current day and hour
 				System.out.println("│" + title + " │" + hour + "│");
 			}
@@ -67,23 +71,80 @@ class Schedule {
 		// Loop through each task to print tasks scheduled for the current day
 		for (Task t : tasks.values()) {
 			// Print task details only if it's not completed and scheduled for today
-			if (t.taskState == stateT.undone && (t.dateStart!=null && currentDateTime.toLocalDate().isEqual(t.dateStart.toLocalDate()) || t.deadline!=null && currentDateTime.toLocalDate().isEqual(t.deadline.toLocalDate()))) {
+			if (t.taskState == stateT.undone
+					&& (t.dateStart != null && currentDateTime.toLocalDate().isEqual(t.dateStart.toLocalDate())
+							|| t.deadline != null && currentDateTime.toLocalDate().isEqual(t.deadline.toLocalDate()))) {
 				String title = String.format(" %-" + TITLE_WIDTH + "s", t.title); // Format task title
-				if(t.dateStart!=null) {
-					String hour = t.dateStart.format(DateTimeFormatter.ofPattern("HH:mm"))+"-"+t.dateEnd.format(DateTimeFormatter.ofPattern("HH:mm")); // Format task hour
+				if (t.dateStart != null) {
+					String hour = t.dateStart.format(DateTimeFormatter.ofPattern("HH:mm")) + "-"
+							+ t.dateEnd.format(DateTimeFormatter.ofPattern("HH:mm")); // Format task hour
 					System.out.println("│" + title + " │" + hour + "│");
 				}
-				if (t.deadline!=null){
+				if (t.deadline != null) {
 					String hour = t.deadline.format(DateTimeFormatter.ofPattern("HH:mm")); // Format task hour
 					System.out.println("│" + title + " │   " + hour + "   │");
 				}
-
-
 
 				// Print the task scheduled for the current day and hour
 
 			}
 		}
 		System.out.println("└───────────────────────────┴───────────┘"); // End of table
+	}
+
+	// Method to print the weekly schedule (tasks and wishes)
+	void printScheduleWeekly(HashMap<Integer, Task> tasks, HashMap<Integer, Wish> wishes) {
+		LocalDateTime now = LocalDateTime.now();
+
+		for (int i = 0; i < 7; i++) {
+			LocalDateTime day = now.plusDays(i);
+			String currentDate = day.toLocalDate().toString();
+
+			// Print the header for this day's schedule
+			System.out.println("┌───────────────────────────┬────────────┐");
+			System.out.println("│ " + currentDate + "                │ Hour       │");
+			System.out.println("└───────────────────────────┼────────────┘");
+
+			boolean hasEntries = false;
+
+			// Wishes for this day
+			for (Wish w : wishes.values()) {
+				if (w.wishState == stateW.approved && w.dateStart != null) {
+					String start = w.dateStart.toLocalDate().toString();
+					if (start.equals(currentDate)) {
+						hasEntries = true;
+						String title = String.format(" %-" + TITLE_WIDTH + "s", w.title);
+						String hourMinute = w.dateStart.format(DateTimeFormatter.ofPattern("HH:mm"));
+						System.out.println("│" + title + " │ " + hourMinute + "│");
+					}
+				}
+			}
+
+			// Tasks for this day
+			for (Task t : tasks.values()) {
+				if (t.taskState == stateT.undone) {
+
+					hasEntries = true;
+					String title = String.format(" %-" + TITLE_WIDTH + "s", t.title);
+
+					if (t.deadline != null) {
+						String dateString = t.deadline.toLocalDate().toString();
+						String hourMinute = t.deadline.format(DateTimeFormatter.ofPattern("HH:mm"));
+						if (dateString.equals(currentDate))
+							System.out.println("│" + title + " │ " + hourMinute + "│");
+					} else {
+						String dateStartString = t.dateStart.toLocalDate().toString();
+						if (dateStartString.equals(currentDate))
+							System.out.println("│" + title + " │ " + t.dateEnd.format(formatter) + "│");
+					}
+				}
+			}
+
+			if (!hasEntries) {
+				System.out.println("│ No scheduled tasks or wishes         │            │");
+			}
+
+			System.out.println("└───────────────────────────┴────────────┘\n");
+		}
 	}
 }
