@@ -107,6 +107,10 @@ class TaskWishManager {
                         child.printSchedule("daily");
                         break;
 
+                    case "PRINT_SCHEDULE_WEEKLY":
+                        child.printSchedule("weekly");
+                        break;
+
                     case "ADD_POINT":
                         child.addPoints(Integer.parseInt(tokens[1]));
                         System.out.println(tokens[1] + " points added.");

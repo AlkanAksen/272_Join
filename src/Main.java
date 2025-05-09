@@ -7,9 +7,6 @@ class Main {
         loadFiles(reader); // Load data and process commands
         
         // Schedule Test
-        child.printSchedule("taskList");
-        child.printSchedule("wishList");
-        child.printSchedule("daily");
     }
     
     static void loadFiles(FileReader reader) {

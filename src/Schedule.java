@@ -101,9 +101,9 @@ class Schedule {
 			String currentDate = day.toLocalDate().toString();
 
 			// Print the header for this day's schedule
-			System.out.println("┌───────────────────────────┬────────────┐");
-			System.out.println("│ " + currentDate + "                │ Hour       │");
-			System.out.println("└───────────────────────────┼────────────┘");
+			System.out.println("┌───────────────────────────┬───────────┐");
+			System.out.println("│ " + currentDate + "                │ Hour      │");
+			System.out.println("└───────────────────────────┼───────────┘");
 
 			boolean hasEntries = false;
 
@@ -115,7 +115,7 @@ class Schedule {
 						hasEntries = true;
 						String title = String.format(" %-" + TITLE_WIDTH + "s", w.title);
 						String hourMinute = w.dateStart.format(DateTimeFormatter.ofPattern("HH:mm"));
-						System.out.println("│" + title + " │ " + hourMinute + "│");
+						System.out.println("│" + title + " │   " + hourMinute + "   │");
 					}
 				}
 			}
@@ -131,20 +131,22 @@ class Schedule {
 						String dateString = t.deadline.toLocalDate().toString();
 						String hourMinute = t.deadline.format(DateTimeFormatter.ofPattern("HH:mm"));
 						if (dateString.equals(currentDate))
-							System.out.println("│" + title + " │ " + hourMinute + "│");
+							System.out.println("│" + title + " │   " + hourMinute + "   │");
 					} else {
 						String dateStartString = t.dateStart.toLocalDate().toString();
+						String hour = t.dateStart.format(DateTimeFormatter.ofPattern("HH:mm")) + "-"
+								+ t.dateEnd.format(DateTimeFormatter.ofPattern("HH:mm")); // Format task hour
 						if (dateStartString.equals(currentDate))
-							System.out.println("│" + title + " │ " + t.dateEnd.format(formatter) + "│");
+							System.out.println("│" + title + " │" + hour + "│");
 					}
 				}
 			}
 
 			if (!hasEntries) {
-				System.out.println("│ No scheduled tasks or wishes         │            │");
+				System.out.println("│ No scheduled tasks or wishes         │           │");
 			}
 
-			System.out.println("└───────────────────────────┴────────────┘\n");
+			System.out.println("└───────────────────────────┴───────────┘\n");
 		}
 	}
 }

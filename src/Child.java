@@ -44,6 +44,9 @@ class Child {
             case "daily":
                 schedule.printScheduleDaily(tasks, wishes); // Print today's schedule
                 break;
+            case "weekly":
+                schedule.printScheduleWeekly(tasks, wishes); // Print today's schedule
+                break;
         }
     }
 }
