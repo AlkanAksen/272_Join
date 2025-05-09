@@ -14,7 +14,6 @@ class Task {
     LocalDateTime deadline;          // Task's deadline (currently unused)
     LocalDateTime dateStart;         // Task's scheduled date
     LocalDateTime dateEnd;         // Task's scheduled date
-    String hour;            // Task's scheduled hour
     int points;             // Points awarded when the task is completed and approved
     stateT taskState = stateT.undone;  // Task's initial state is 'undone'
     String type;

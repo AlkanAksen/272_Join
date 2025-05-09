@@ -5,6 +5,9 @@ class Child {
      int points = 0;
      int level = 1;
 
+     Parent parent;
+     Teacher teacher;
+
     // Lists to store the child's tasks and wishes
      HashMap<Integer, Task> tasks = new HashMap<>();
      HashMap<Integer, Wish> wishes = new HashMap<>();
@@ -27,6 +30,7 @@ class Child {
     void printStatus() {
         System.out.println("[Child Points: " + points + ", Level: " + level + "]");
     }
+    void printBudget() {System.out.println("[Child Points: " + points+"]");}
 
     // Print different parts of the schedule based on type
     void printSchedule(String str) {

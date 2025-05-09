@@ -15,7 +15,6 @@ class Wish {
 	int requiredLevel; // The level required to approve the wish
 	LocalDateTime dateStart; // Date the wish is scheduled for (if applicable)
 	LocalDateTime dateEnd; // Date the wish is scheduled for (if applicable)
-	String hour1; // The time scheduled for the wish (if applicable)
 
 	// Constructor for wishes WITHOUT a time period
 	public Wish(int id, String title, String details) {

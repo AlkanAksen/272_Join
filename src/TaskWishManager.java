@@ -80,10 +80,14 @@ class TaskWishManager {
                         break;
 
                     case "WISH_CHECKED":
-                        if (tokens.length >= 5) {
+                        if (tokens.length >= 4 && tokens[2].compareTo("APPROVED") == 0) {
                             int id = Integer.parseInt(tokens[1]);
-                            int level = Integer.parseInt(tokens[4]);
+                            int level = Integer.parseInt(tokens[3]);
                             approveWish(id, level);
+                        }
+                        else if(tokens.length == 3 && tokens[2].compareTo("REJECTED") == 0){
+                            int id = Integer.parseInt(tokens[1]);
+                            rejectWish(id);
                         }
                         break;
 
@@ -109,8 +113,9 @@ class TaskWishManager {
                         break;
 
                     case "PRINT_BUDGET":
-                        child.printStatus();
+                        child.printBudget();
                         break;
+
 
                     default:
                         System.out.println("Unknown command: " + command);
@@ -171,6 +176,14 @@ class TaskWishManager {
             }
         } else {
             System.out.println("Wish not found.");
+        }
+    }
+
+    public void rejectWish(int wishId){
+        if (child.wishes.containsKey(wishId)) {
+            Wish wish = child.wishes.get(wishId);
+            wish.rejected();
+            System.out.println("Wish " + wishId + " rejected: " + wish.title);
         }
     }
 }
